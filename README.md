@@ -110,8 +110,8 @@ FUTURE_FS_02/
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/sumananand460/FUTURE_FS_02.git
-cd FUTURE_FS_02
+git clone https://github.com/AstitvaAnand06/FUTURE_FS_02.git
+cd -FUTURE_FS_02
 ```
 
 ### 2. Setup Backend
@@ -133,7 +133,7 @@ npm run dev
 ### 4. Open the app
 ```
 Frontend: http://localhost:3000
-Backend:  http://localhost:5000
+Backend:  http://localhost:5001
 ```
 
 Register an admin account on first launch, then start adding leads!
@@ -174,4 +174,4 @@ Register an admin account on first launch, then start adding leads!
 
 ---
 
-© 2026 **Suman Anand** — Future Interns Full Stack Internship
+© 2026 **Astitva Anand** — Future Interns Full Stack Internship
