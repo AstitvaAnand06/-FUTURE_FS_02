@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeadFlow CRM — Astitva Anand</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ── LIGHT THEME ── */
+    :root {
+      --bg:#f0f4ff; --surface:#fff; --sidebar:#0f1f5c;
+      --blue:#1a3bce; --blue2:#2f54e8; --blue-lt:#e8eeff; --blue-lt2:#dce4ff;
+      --text:#0d1333; --text2:#4a5378; --border:#dde3f5;
+      --new:#2f54e8; --new-bg:#e8eeff;
+      --cont:#d97706; --cont-bg:#fef3c7;
+      --conv:#059669; --conv-bg:#d1fae5;
+      --danger:#dc2626; --danger-bg:#fee2e2;
+      --shadow:0 1px 3px rgba(15,31,92,.08),0 4px 12px rgba(15,31,92,.06);
+      --shadow-lg:0 8px 32px rgba(15,31,92,.14);
+      --particle-opacity:0.06;
+    }
+    /* ── DARK THEME ── */
+    [data-theme="dark"] {
+      --bg:#0d1117; --surface:#161b22; --sidebar:#0d1117;
+      --blue:#4f7dff; --blue2:#5c8aff; --blue-lt:rgba(79,125,255,.12); --blue-lt2:rgba(79,125,255,.2);
+      --text:#e6edf3; --text2:#8b949e; --border:#30363d;
+      --new:#4f7dff; --new-bg:rgba(79,125,255,.15);
+      --cont:#f0a030; --cont-bg:rgba(240,160,48,.12);
+      --conv:#3fb950; --conv-bg:rgba(63,185,80,.12);
+      --danger:#f85149; --danger-bg:rgba(248,81,73,.12);
+      --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
+      --shadow-lg:0 8px 32px rgba(0,0,0,.4);
+      --particle-opacity:0.12;
+    }
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+    #root{display:flex;min-height:100vh}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-thumb{background:var(--blue-lt2);border-radius:3px}
+
+    /* ── ANIMATED BG CANVAS ── */
+    #bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:var(--particle-opacity)}
+
+    /* ── SIDEBAR ── */
+    .sidebar{width:240px;flex-shrink:0;background:var(--sidebar);min-height:100vh;display:flex;flex-direction:column;padding:1.5rem 1rem;position:fixed;top:0;left:0;bottom:0;z-index:50;border-right:1px solid var(--border);transition:background .3s}
+    .sidebar-logo{display:flex;align-items:center;gap:.7rem;margin-bottom:2.5rem;padding:0 .5rem}
+    .logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#4f7dff,#1a3bce);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;box-shadow:0 4px 12px rgba(47,84,232,.4)}
+    .logo-text{font-size:1rem;font-weight:800;color:#fff;letter-spacing:-.3px}
+    .logo-text span{color:#7fa4ff}
+    .nav-label{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin:0 .5rem 1rem;margin-top:.5rem}
+    .nav-item{display:flex;align-items:center;gap:.8rem;padding:.65rem .8rem;border-radius:8px;color:rgba(255,255,255,.6);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .18s;margin-bottom:.25rem;border:none;background:none;width:100%;text-align:left}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+    .nav-item.active{background:rgba(79,125,255,.25);color:#fff}
+    .nav-icon{font-size:1rem;width:20px;text-align:center}
+    .nav-badge{margin-left:auto;font-size:.65rem;font-weight:700;background:var(--blue2);color:#fff;padding:.15rem .45rem;border-radius:10px;min-width:20px;text-align:center}
+    .sidebar-footer{margin-top:auto;padding:.8rem;border-top:1px solid rgba(255,255,255,.08)}
+    .user-chip{display:flex;align-items:center;gap:.7rem}
+    .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4f7dff,#7fa4ff);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0}
+    .user-name{font-size:.82rem;font-weight:600;color:rgba(255,255,255,.85)}
+    .user-role{font-size:.68rem;color:rgba(255,255,255,.4)}
+    .logout-btn{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:1rem;transition:color .18s;padding:.3rem}
+    .logout-btn:hover{color:#ff6b6b}
+
+    /* MAIN */
+    .main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1}
+
+    /* TOPBAR */
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;transition:background .3s,border-color .3s;backdrop-filter:blur(12px)}
+    .topbar-left h1{font-size:1.25rem;font-weight:800;letter-spacing:-.4px}
+    .topbar-left p{font-size:.8rem;color:var(--text2);margin-top:.1rem}
+    .topbar-right{display:flex;gap:.75rem;align-items:center}
+
+    /* DARK MODE TOGGLE */
+    .theme-toggle{width:40px;height:22px;background:var(--border);border-radius:11px;border:none;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0}
+    .theme-toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .3s,background .3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    [data-theme="dark"] .theme-toggle{background:var(--blue2)}
+    [data-theme="dark"] .theme-toggle::after{transform:translateX(18px)}
+    .theme-label{font-size:.78rem;color:var(--text2);font-weight:500}
+
+    /* BUTTONS */
+    .btn{font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:.45rem;padding:.6rem 1.2rem}
+    .btn-primary{background:var(--blue2);color:#fff;box-shadow:0 2px 8px rgba(47,84,232,.3)}
+    .btn-primary:hover{background:var(--blue);transform:translateY(-1px);box-shadow:0 4px 16px rgba(47,84,232,.4)}
+    .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+    .btn-ghost:hover{background:var(--blue-lt);color:var(--blue2);border-color:var(--blue-lt2)}
+    .btn-danger{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(248,81,73,.3)}
+    .btn-danger:hover{background:var(--danger);color:#fff}
+    .btn-sm{padding:.4rem .85rem;font-size:.78rem}
+    .btn-icon{padding:.5rem;width:34px;height:34px;justify-content:center}
+
+    /* SEARCH */
+    .search-wrap{position:relative}
+    .search-wrap input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.55rem 1rem .55rem 2.3rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none;width:220px;transition:all .2s}
+    .search-wrap input:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(47,84,232,.1);width:260px}
+    .search-wrap input::placeholder{color:var(--text2)}
+    .search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text2);font-size:.9rem;pointer-events:none}
+
+    /* STATS */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;padding:1.5rem 2rem 0}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.4rem;box-shadow:var(--shadow);animation:fadeUp .5s cubic-bezier(.16,1,.3,1) both;transition:transform .2s,box-shadow .2s,background .3s,border-color .3s;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--blue-lt),transparent);opacity:0;transition:opacity .3s}
+    .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+    .stat-card:hover::before{opacity:1}
+    .stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+    .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+    .stat-num{font-size:2rem;font-weight:800;letter-spacing:-1px;line-height:1}
+    .stat-label{font-size:.78rem;color:var(--text2);margin-top:.3rem;font-weight:500}
+
+    /* CONTENT */
+    .content{padding:1.5rem 2rem 2rem;flex:1}
+
+    /* FILTER BAR */
+    .filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;box-shadow:var(--shadow);transition:background .3s,border-color .3s}
+    .filter-label{font-size:.78rem;font-weight:600;color:var(--text2)}
+    .filter-select{font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;font-weight:500;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:.45rem .85rem;color:var(--text);cursor:pointer;outline:none;transition:background .3s,border-color .3s,color .3s}
+
+    /* TABLE */
+    .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);animation:fadeUp .5s .1s cubic-bezier(.16,1,.3,1) both;transition:background .3s,border-color .3s}
+    table{width:100%;border-collapse:collapse}
+    thead{background:var(--bg);border-bottom:1px solid var(--border)}
+    th{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);padding:.85rem 1.25rem;text-align:left}
+    td{padding:1rem 1.25rem;font-size:.88rem;border-bottom:1px solid var(--border);vertical-align:middle}
+    tbody tr{transition:background .15s}
+    tbody tr:hover{background:var(--blue-lt)}
+    tbody tr:last-child td{border-bottom:none}
+    .lead-name{font-weight:700;color:var(--text)}
+    .lead-email{font-size:.78rem;color:var(--text2);margin-top:.15rem;font-family:'JetBrains Mono',monospace}
+    .lead-company{font-size:.82rem;color:var(--text2)}
+
+    /* BADGES */
+    .badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:700;padding:.3rem .75rem;border-radius:20px;white-space:nowrap}
+    .badge::before{content:'';width:6px;height:6px;border-radius:50%}
+    .badge-new{background:var(--new-bg);color:var(--new)}.badge-new::before{background:var(--new)}
+    .badge-contacted{background:var(--cont-bg);color:var(--cont)}.badge-contacted::before{background:var(--cont)}
+    .badge-converted{background:var(--conv-bg);color:var(--conv)}.badge-converted::before{background:var(--conv)}
+    .source-chip{font-size:.72rem;font-weight:600;background:var(--blue-lt);color:var(--blue2);padding:.25rem .65rem;border-radius:6px}
+    .actions{display:flex;gap:.4rem}
+
+    /* EMPTY */
+    .empty-state{padding:4rem 2rem;text-align:center}
+    .empty-state .empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.4}
+    .empty-state h3{font-size:1rem;font-weight:700;margin-bottom:.4rem}
+    .empty-state p{font-size:.85rem;color:var(--text2)}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .2s ease}
+    .modal{background:var(--surface);border-radius:16px;padding:2rem;width:100%;max-width:520px;box-shadow:var(--shadow-lg);animation:slideUp .3s cubic-bezier(.16,1,.3,1);max-height:90vh;overflow-y:auto;border:1px solid var(--border);transition:background .3s,border-color .3s}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+    .modal-title{font-size:1.1rem;font-weight:800;letter-spacing:-.3px}
+    .modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text2);padding:.3rem;border-radius:6px;transition:all .15s}
+    .modal-close:hover{background:var(--danger-bg);color:var(--danger)}
+
+    /* FORM */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .form-group{display:flex;flex-direction:column;gap:.4rem}
+    .form-group.full{grid-column:1/-1}
+    label{font-size:.75rem;font-weight:700;color:var(--text2);letter-spacing:.03em}
+    .form-group input,.form-group select,.form-group textarea{font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);outline:none;transition:all .2s}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(79,125,255,.15)}
+    .form-group textarea{resize:vertical;min-height:80px}
+    .form-actions{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem}
+
+    /* NOTES */
+    .notes-section{margin-top:1.5rem}
+    .notes-title{font-size:.85rem;font-weight:700;margin-bottom:.75rem}
+    .note-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;margin-bottom:.5rem;display:flex;align-items:flex-start;gap:.75rem}
+    .note-text{flex:1;font-size:.85rem;line-height:1.5}
+    .note-time{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text2);white-space:nowrap}
+    .note-input-row{display:flex;gap:.6rem;margin-top:.75rem}
+    .note-input-row input{flex:1;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.55rem .9rem;color:var(--text);outline:none}
+
+    /* LOGIN */
+    .login-page{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a1040 0%,#0f1f5c 50%,#162370 100%);padding:1.5rem;position:relative;overflow:hidden}
+    .login-card{background:rgba(255,255,255,.97);border-radius:20px;padding:2.5rem;width:100%;max-width:400px;box-shadow:var(--shadow-lg);animation:slideUp .5s cubic-bezier(.16,1,.3,1);position:relative;z-index:1;border:1px solid rgba(255,255,255,.2)}
+    [data-theme="dark"] .login-card{background:rgba(22,27,34,.97);border-color:var(--border)}
+    .login-logo{text-align:center;margin-bottom:2rem}
+    .login-logo .logo-big{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#4f7dff,#1a3bce);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 1rem;box-shadow:0 8px 24px rgba(47,84,232,.35)}
+    .login-logo h1{font-size:1.5rem;font-weight:800;letter-spacing:-.5px}
+    .login-logo h1 span{color:var(--blue2)}
+    .login-logo p{font-size:.82rem;color:var(--text2);margin-top:.3rem}
+    .login-form{display:flex;flex-direction:column;gap:1rem}
+    .login-form input{font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;color:var(--text);outline:none;transition:all .2s}
+    .login-form input:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(47,84,232,.12)}
+    .login-error{font-size:.8rem;color:var(--danger);background:var(--danger-bg);padding:.6rem .9rem;border-radius:8px}
+    .login-toggle{text-align:center;margin-top:1rem;font-size:.82rem;color:var(--text2)}
+    .login-toggle button{background:none;border:none;color:var(--blue2);font-weight:700;cursor:pointer;font-size:.82rem}
+    .login-footer{text-align:center;margin-top:1.5rem;font-size:.72rem;color:var(--text2)}
+
+    /* TOAST */
+    .toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem}
+    .toast{background:var(--text);color:var(--bg);padding:.75rem 1.2rem;border-radius:10px;font-size:.82rem;font-weight:600;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:.6rem;animation:toastIn .35s cubic-bezier(.16,1,.3,1);max-width:280px}
+    .toast.success{background:var(--conv);color:#fff}
+    .toast.error{background:var(--danger);color:#fff}
+
+    /* CHART SECTION */
+    .dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;box-shadow:var(--shadow);animation:fadeUp .5s cubic-bezier(.16,1,.3,1) both;transition:background .3s,border-color .3s}
+    .chart-title{font-size:.88rem;font-weight:800;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem;color:var(--text)}
+    .chart-subtitle{font-size:.72rem;color:var(--text2);font-weight:400;margin-left:auto}
+
+    /* PIE CHART */
+    .pie-wrap{display:flex;align-items:center;gap:2rem}
+    .pie-legend{display:flex;flex-direction:column;gap:.75rem;flex:1}
+    .legend-item{display:flex;align-items:center;gap:.6rem}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .legend-label{font-size:.78rem;color:var(--text2);flex:1}
+    .legend-val{font-size:.82rem;font-weight:700;color:var(--text)}
+    .legend-pct{font-size:.72rem;color:var(--text2);margin-left:.2rem}
+
+    /* BAR CHART */
+    .bar-chart{display:flex;align-items:flex-end;gap:.6rem;height:120px;padding-top:.5rem}
+    .bar-col{display:flex;flex-direction:column;align-items:center;gap:.4rem;flex:1}
+    .bar{width:100%;border-radius:4px 4px 0 0;transition:height .8s cubic-bezier(.16,1,.3,1),opacity .3s;min-height:4px;position:relative;cursor:default}
+    .bar:hover{opacity:.8;transform:scaleY(1.03);transform-origin:bottom}
+    .bar-label{font-size:.65rem;color:var(--text2);white-space:nowrap;font-weight:600}
+    .bar-val{font-size:.72rem;font-weight:700;color:var(--text)}
+
+    /* RECENT TABLE */
+    .recent-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;box-shadow:var(--shadow);animation:fadeUp .5s .2s cubic-bezier(.16,1,.3,1) both;transition:background .3s,border-color .3s}
+    .recent-row{display:flex;align-items:center;gap:1rem;padding:.65rem 0;border-bottom:1px solid var(--border)}
+    .recent-row:last-child{border-bottom:none}
+    .recent-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue-lt2),var(--blue-lt));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--blue2);flex-shrink:0}
+
+    /* ANIMATIONS */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .sidebar{display:none}
+      .main{margin-left:0}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .form-grid{grid-template-columns:1fr}
+      .dashboard-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+const API = 'http://localhost:5001/api';
+
+// ── ANIMATED BACKGROUND ──
+function initCanvas() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let animId;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < 55; i++) {
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 2.5 + 0.5,
+      dx: (Math.random() - 0.5) * 0.4,
+      dy: (Math.random() - 0.5) * 0.4,
+      opacity: Math.random() * 0.5 + 0.1
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const color = isDark ? '100,160,255' : '26,59,206';
+
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color},${p.opacity})`;
+      ctx.fill();
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    });
+
+    // Draw connecting lines
+    particles.forEach((a, i) => {
+      particles.slice(i + 1).forEach(b => {
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(${color},${0.08 * (1 - dist / 100)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      });
+    });
+
+    animId = requestAnimationFrame(draw);
+  }
+  draw();
+  return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+}
+
+// ── API HELPER ──
+async function apiFetch(path, opts={}) {
+  const t = localStorage.getItem('crm_token');
+  try {
+    const res = await fetch(API + path, {
+      headers: { 'Content-Type': 'application/json', ...(t ? { Authorization: `Bearer ${t}` } : {}) },
+      ...opts
+    });
+    return res.json();
+  } catch(e) {
+    return { success: false, error: 'Cannot connect to server. Is the backend running?' };
+  }
+}
+
+// ── PIE CHART ──
+function PieChart({ data }) {
+  const canvasRef = useRef(null);
+  const total = data.reduce((a, d) => a + d.value, 0);
+
+  useEffect(() => {
+    if (!canvasRef.current || total === 0) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const cx = canvas.width / 2, cy = canvas.height / 2, r = 55;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let startAngle = -Math.PI / 2;
+    let progress = { val: 0 };
+    let animId;
+
+    function animate() {
+      progress.val = Math.min(progress.val + 0.04, 1);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw donut segments
+      let ang = -Math.PI / 2;
+      data.forEach(d => {
+        const slice = (d.value / total) * Math.PI * 2 * progress.val;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, ang, ang + slice);
+        ctx.closePath();
+        ctx.fillStyle = d.color;
+        ctx.fill();
+        ang += slice;
+      });
+
+      // White hole for donut effect
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.55, 0, Math.PI * 2);
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      ctx.fillStyle = isDark ? '#161b22' : '#ffffff';
+      ctx.fill();
+
+      // Center text
+      ctx.fillStyle = isDark ? '#e6edf3' : '#0d1333';
+      ctx.font = 'bold 18px Plus Jakarta Sans';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(total, cx, cy - 6);
+      ctx.font = '10px Plus Jakarta Sans';
+      ctx.fillStyle = isDark ? '#8b949e' : '#4a5378';
+      ctx.fillText('Total', cx, cy + 10);
+
+      if (progress.val < 1) animId = requestAnimationFrame(animate);
+    }
+    animate();
+    return () => cancelAnimationFrame(animId);
+  }, [data, total]);
+
+  if (total === 0) return (
+    <div style={{textAlign:'center',padding:'2rem',color:'var(--text2)',fontSize:'.85rem'}}>No data yet</div>
+  );
+
+  return (
+    <div className="pie-wrap">
+      <canvas ref={canvasRef} width={140} height={140} style={{flexShrink:0}}/>
+      <div className="pie-legend">
+        {data.map(d => (
+          <div className="legend-item" key={d.label}>
+            <div className="legend-dot" style={{background:d.color}}/>
+            <span className="legend-label">{d.label}</span>
+            <span className="legend-val">{d.value}</span>
+            <span className="legend-pct">({total ? Math.round(d.value/total*100) : 0}%)</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── BAR CHART ──
+function BarChart({ data }) {
+  const [animated, setAnimated] = useState(false);
+  useEffect(() => { setTimeout(() => setAnimated(true), 100); }, []);
+  const max = Math.max(...data.map(d => d.value), 1);
+
+  return (
+    <div className="bar-chart">
+      {data.map(d => (
+        <div className="bar-col" key={d.label}>
+          <span className="bar-val">{d.value}</span>
+          <div className="bar" style={{
+            height: animated ? `${(d.value / max) * 100}%` : '0%',
+            background: d.color,
+            boxShadow: `0 4px 12px ${d.color}40`
+          }}/>
+          <span className="bar-label">{d.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── TOAST ──
+function ToastContainer({ toasts }) {
+  return (
+    <div className="toast-container">
+      {toasts.map(t => (
+        <div key={t.id} className={`toast ${t.type}`}>
+          <span>{t.type==='success'?'✓':'✕'}</span> {t.msg}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── LOGIN ──
+function LoginPage({ onLogin, addToast }) {
+  const [mode, setMode] = useState('login');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault(); setErr('');
+    if (!username.trim() || !password.trim()) { setErr('Please fill in both fields'); return; }
+    setLoading(true);
+    const res = await apiFetch(`/auth/${mode}`, { method:'POST', body:JSON.stringify({ username:username.trim(), password:password.trim() }) });
+    setLoading(false);
+    if (res.success) {
+      localStorage.setItem('crm_token', res.token);
+      localStorage.setItem('crm_user', res.username);
+      onLogin(res.username);
+      addToast('Welcome, ' + res.username + '!', 'success');
+    } else { setErr(res.error || 'Something went wrong.'); }
+  }
+
+  return (
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-logo">
+          <div className="logo-big">📊</div>
+          <h1>Lead<span>Flow</span></h1>
+          <p>Client Lead Management System</p>
+        </div>
+        <form className="login-form" onSubmit={handleSubmit}>
+          {err && <div className="login-error">⚠ {err}</div>}
+          <input placeholder="Username" value={username} onChange={e=>setUsername(e.target.value)} autoComplete="username"/>
+          <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} autoComplete="current-password"/>
+          <button className="btn btn-primary" type="submit" style={{justifyContent:'center',padding:'.85rem'}} disabled={loading}>
+            {loading ? 'Please wait...' : (mode==='login' ? '→ Sign In' : '→ Create Account')}
+          </button>
+        </form>
+        <div className="login-toggle">
+          {mode==='login' ? "Don't have an account? " : 'Already have an account? '}
+          <button onClick={()=>{setMode(mode==='login'?'register':'login');setErr('');}}>
+            {mode==='login' ? 'Register' : 'Sign In'}
+          </button>
+        </div>
+        <div className="login-footer">© 2026 Astitva Anand — LeadFlow CRM</div>
+      </div>
+    </div>
+  );
+}
+
+// ── LEAD MODAL ──
+function LeadModal({ lead, onClose, onSave, addToast }) {
+  const isEdit = !!lead?._id;
+  const [form, setForm] = useState({ name:'', email:'', phone:'', company:'', source:'Website', status:'New', followUpDate:'', ...lead });
+  const [noteText, setNoteText] = useState('');
+  const [notes, setNotes] = useState(lead?.notes || []);
+  const [saving, setSaving] = useState(false);
+
+  function set(k,v){ setForm(f=>({...f,[k]:v})); }
+
+  async function handleSubmit(e) {
+    e.preventDefault(); setSaving(true);
+    const res = await apiFetch(isEdit ? `/leads/${lead._id}` : '/leads', { method: isEdit?'PUT':'POST', body: JSON.stringify({...form, notes}) });
+    setSaving(false);
+    if (res._id || res.success) { onSave(res.data||res); onClose(); addToast(isEdit?'Lead updated!':'Lead added!','success'); }
+    else addToast(res.error||'Failed','error');
+  }
+
+  async function addNote() {
+    if (!noteText.trim() || !isEdit) return;
+    const res = await apiFetch(`/leads/${lead._id}/notes`,{method:'POST',body:JSON.stringify({text:noteText})});
+    if (res._id||res.notes) { setNotes(res.notes||res.data?.notes||[]); setNoteText(''); addToast('Note added!','success'); }
+  }
+
+  async function delNote(noteId) {
+    const res = await apiFetch(`/leads/${lead._id}/notes/${noteId}`,{method:'DELETE'});
+    if (res._id||res.notes) setNotes(res.notes||res.data?.notes||[]);
+  }
+
+  return (
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <div className="modal-title">{isEdit?'✏️ Edit Lead':'➕ New Lead'}</div>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-group"><label>Full Name *</label><input value={form.name} onChange={e=>set('name',e.target.value)} placeholder="John Doe" required/></div>
+            <div className="form-group"><label>Email *</label><input type="email" value={form.email} onChange={e=>set('email',e.target.value)} placeholder="john@company.com" required/></div>
+            <div className="form-group"><label>Phone</label><input value={form.phone} onChange={e=>set('phone',e.target.value)} placeholder="+91 98765 43210"/></div>
+            <div className="form-group"><label>Company</label><input value={form.company} onChange={e=>set('company',e.target.value)} placeholder="Acme Corp"/></div>
+            <div className="form-group"><label>Source</label>
+              <select value={form.source} onChange={e=>set('source',e.target.value)}>
+                {['Website','LinkedIn','Referral','Cold Outreach','Social Media','Other'].map(s=><option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label>Status</label>
+              <select value={form.status} onChange={e=>set('status',e.target.value)}>
+                {['New','Contacted','Converted'].map(s=><option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="form-group full"><label>Follow-up Date</label>
+              <input type="date" value={form.followUpDate?form.followUpDate.substring(0,10):''} onChange={e=>set('followUpDate',e.target.value)}/>
+            </div>
+          </div>
+          {isEdit && (
+            <div className="notes-section">
+              <div className="notes-title">📝 Notes ({notes.length})</div>
+              {notes.map(n=>(
+                <div className="note-item" key={n._id}>
+                  <div className="note-text">{n.text}</div>
+                  <div className="note-time">{new Date(n.createdAt).toLocaleDateString()}</div>
+                  <button type="button" className="btn btn-sm btn-danger btn-icon" onClick={()=>delNote(n._id)}>✕</button>
+                </div>
+              ))}
+              <div className="note-input-row">
+                <input placeholder="Add a note..." value={noteText} onChange={e=>setNoteText(e.target.value)} onKeyDown={e=>e.key==='Enter'&&(e.preventDefault(),addNote())}/>
+                <button type="button" className="btn btn-primary btn-sm" onClick={addNote}>Add</button>
+              </div>
+            </div>
+          )}
+          <div className="form-actions">
+            <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>{saving?'Saving...':(isEdit?'✓ Update Lead':'+ Add Lead')}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN APP ──
+function App() {
+  const [user,       setUser]       = useState(localStorage.getItem('crm_user'));
+  const [leads,      setLeads]      = useState([]);
+  const [stats,      setStats]      = useState({total:0,new:0,contacted:0,converted:0});
+  const [search,     setSearch]     = useState('');
+  const [statusF,    setStatusF]    = useState('All');
+  const [sourceF,    setSourceF]    = useState('All');
+  const [modal,      setModal]      = useState(null);
+  const [toasts,     setToasts]     = useState([]);
+  const [loading,    setLoading]    = useState(false);
+  const [view,       setView]       = useState('leads');
+  const [delConfirm, setDelConfirm] = useState(null);
+  const [darkMode,   setDarkMode]   = useState(false);
+
+  // Init canvas animation
+  useEffect(() => {
+    const cleanup = initCanvas();
+    return cleanup;
+  }, []);
+
+  // Dark mode toggle
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  function addToast(msg, type='success') {
+    const id = Date.now();
+    setToasts(t=>[...t,{id,msg,type}]);
+    setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),3000);
+  }
+
+  const fetchLeads = useCallback(async()=>{
+    if (!user) return;
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (search) params.set('search',search);
+    if (statusF!=='All') params.set('status',statusF);
+    if (sourceF!=='All') params.set('source',sourceF);
+    const res = await apiFetch(`/leads?${params}`);
+    if (Array.isArray(res)) setLeads(res);
+    else if (res.error) addToast(res.error,'error');
+    setLoading(false);
+  },[user,search,statusF,sourceF]);
+
+  const fetchStats = useCallback(async()=>{
+    if (!user) return;
+    const res = await apiFetch('/leads/stats');
+    if (res.total !== undefined) setStats({total:res.total, new:res.newLeads, contacted:res.contacted, converted:res.converted});
+  },[user]);
+
+  useEffect(()=>{ fetchLeads(); },[fetchLeads]);
+  useEffect(()=>{ fetchStats(); },[fetchStats]);
+
+  function logout() {
+    localStorage.removeItem('crm_token'); localStorage.removeItem('crm_user');
+    setUser(null); setLeads([]); setStats({total:0,new:0,contacted:0,converted:0});
+  }
+
+  function onSave(updated) {
+    setLeads(prev=>{ const exists=prev.find(l=>l._id===updated._id); return exists?prev.map(l=>l._id===updated._id?updated:l):[updated,...prev]; });
+    fetchStats();
+  }
+
+  async function deleteLead(id) {
+    const res = await apiFetch(`/leads/${id}`,{method:'DELETE'});
+    if (res.message||!res.error) { setLeads(l=>l.filter(x=>x._id!==id)); fetchStats(); addToast('Lead deleted','success'); }
+    else addToast(res.error||'Delete failed','error');
+    setDelConfirm(null);
+  }
+
+  async function quickStatus(lead, status) {
+    const res = await apiFetch(`/leads/${lead._id}`,{method:'PUT',body:JSON.stringify({status})});
+    if (res._id) { onSave(res); addToast(`Marked as ${status}`,'success'); }
+  }
+
+  // Chart data
+  const pieData = [
+    { label:'New',       value: stats.new||0,       color:'#4f7dff' },
+    { label:'Contacted', value: stats.contacted||0,  color:'#f0a030' },
+    { label:'Converted', value: stats.converted||0,  color:'#3fb950' },
+  ];
+
+  // Source breakdown for bar chart
+  const sourceCount = {};
+  leads.forEach(l => { sourceCount[l.source] = (sourceCount[l.source]||0)+1; });
+  const barColors = ['#4f7dff','#3fb950','#f0a030','#f85149','#a371f7','#58a6ff'];
+  const barData = Object.entries(sourceCount).map(([k,v],i) => ({ label:k.replace(' ',''), value:v, color:barColors[i%barColors.length] }));
+
+  if (!user) return (
+    <>
+      <LoginPage onLogin={u=>setUser(u)} addToast={addToast}/>
+      <ToastContainer toasts={toasts}/>
+    </>
+  );
+
+  const statCards = [
+    {label:'Total Leads', num:stats.total,     icon:'👥', bg:'#e8eeff', color:'#1a3bce'},
+    {label:'New',         num:stats.new||0,     icon:'🆕', bg:'#e8eeff', color:'#2f54e8'},
+    {label:'Contacted',   num:stats.contacted||0,icon:'📞', bg:'#fef3c7', color:'#d97706'},
+    {label:'Converted',   num:stats.converted||0,icon:'✅', bg:'#d1fae5', color:'#059669'},
+  ];
+
+  return (
+    <>
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-icon">📊</div>
+          <div className="logo-text">Lead<span>Flow</span></div>
+        </div>
+        <div className="nav-label">Menu</div>
+        <button className={`nav-item ${view==='leads'?'active':''}`} onClick={()=>setView('leads')}>
+          <span className="nav-icon">🎯</span> Leads
+          <span className="nav-badge">{stats.total}</span>
+        </button>
+        <button className={`nav-item ${view==='dashboard'?'active':''}`} onClick={()=>setView('dashboard')}>
+          <span className="nav-icon">📈</span> Dashboard
+        </button>
+        <div className="sidebar-footer">
+          <div className="user-chip">
+            <div className="user-avatar">{user[0].toUpperCase()}</div>
+            <div><div className="user-name">{user}</div><div className="user-role">Admin</div></div>
+            <button className="logout-btn" onClick={logout} title="Logout">↩</button>
+          </div>
+        </div>
+      </aside>
+
+      <div className="main">
+        <div className="topbar">
+          <div className="topbar-left">
+            <h1>{view==='leads'?'🎯 Lead Management':'📈 Dashboard'}</h1>
+            <p>{new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
+          </div>
+          <div className="topbar-right">
+            <span className="theme-label">{darkMode?'🌙':'☀️'}</span>
+            <button className="theme-toggle" onClick={()=>setDarkMode(d=>!d)} title="Toggle dark mode"/>
+            {view==='leads' && (
+              <>
+                <div className="search-wrap">
+                  <span className="search-icon">🔍</span>
+                  <input placeholder="Search leads..." value={search} onChange={e=>setSearch(e.target.value)}/>
+                </div>
+                <button className="btn btn-primary" onClick={()=>setModal('add')}>+ Add Lead</button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="stats-grid">
+          {statCards.map((s,i)=>(
+            <div className="stat-card" key={s.label} style={{animationDelay:`${i*.07}s`}}>
+              <div className="stat-top"><div className="stat-icon" style={{background:s.bg,color:s.color}}>{s.icon}</div></div>
+              <div className="stat-num">{s.num}</div>
+              <div className="stat-label">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="content">
+          {view==='leads' && (
+            <>
+              <div className="filter-bar">
+                <span className="filter-label">Filter:</span>
+                <select className="filter-select" value={statusF} onChange={e=>setStatusF(e.target.value)}>
+                  {['All','New','Contacted','Converted'].map(s=><option key={s}>{s}</option>)}
+                </select>
+                <select className="filter-select" value={sourceF} onChange={e=>setSourceF(e.target.value)}>
+                  {['All','Website','LinkedIn','Referral','Cold Outreach','Social Media','Other'].map(s=><option key={s}>{s}</option>)}
+                </select>
+                <span style={{marginLeft:'auto',fontSize:'.78rem',color:'var(--text2)',fontWeight:600}}>
+                  {leads.length} lead{leads.length!==1?'s':''}
+                </span>
+              </div>
+
+              <div className="table-wrap">
+                {loading ? (
+                  <div className="empty-state"><div className="empty-icon">⏳</div><h3>Loading...</h3></div>
+                ) : leads.length===0 ? (
+                  <div className="empty-state">
+                    <div className="empty-icon">📭</div>
+                    <h3>No leads found</h3>
+                    <p>Add your first lead using the button above</p>
+                  </div>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr><th>Lead</th><th>Company</th><th>Source</th><th>Follow-up</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      {leads.map(lead=>(
+                        <tr key={lead._id}>
+                          <td>
+                            <div className="lead-name">{lead.name}</div>
+                            <div className="lead-email">{lead.email}</div>
+                          </td>
+                          <td><span className="lead-company">{lead.company||'—'}</span></td>
+                          <td><span className="source-chip">{lead.source}</span></td>
+                          <td style={{fontSize:'.78rem',color:'var(--text2)',fontFamily:'JetBrains Mono,monospace'}}>
+                            {lead.followUpDate?new Date(lead.followUpDate).toLocaleDateString('en-IN'):'—'}
+                          </td>
+                          <td>
+                            <select value={lead.status} onChange={e=>quickStatus(lead,e.target.value)}
+                              style={{fontFamily:'inherit',fontSize:'.78rem',fontWeight:700,background:'transparent',border:'none',cursor:'pointer',outline:'none',color:'var(--text)'}}>
+                              {['New','Contacted','Converted'].map(s=><option key={s}>{s}</option>)}
+                            </select>
+                          </td>
+                          <td>
+                            <div className="actions">
+                              <button className="btn btn-ghost btn-sm btn-icon" onClick={()=>setModal(lead)}>✏️</button>
+                              <button className="btn btn-danger btn-sm btn-icon" onClick={()=>setDelConfirm(lead._id)}>🗑</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </>
+          )}
+
+          {view==='dashboard' && (
+            <>
+              <div className="dashboard-grid">
+                {/* PIE CHART */}
+                <div className="chart-card">
+                  <div className="chart-title">
+                    🎯 Lead Status Breakdown
+                    <span className="chart-subtitle">{stats.total} total</span>
+                  </div>
+                  <PieChart data={pieData}/>
+                </div>
+
+                {/* BAR CHART */}
+                <div className="chart-card">
+                  <div className="chart-title">
+                    📊 Leads by Source
+                    <span className="chart-subtitle">{leads.length} leads</span>
+                  </div>
+                  {barData.length > 0
+                    ? <BarChart data={barData}/>
+                    : <div style={{color:'var(--text2)',fontSize:'.85rem',padding:'2rem 0',textAlign:'center'}}>Add leads to see source breakdown</div>
+                  }
+                </div>
+
+                {/* CONVERSION STATS */}
+                <div className="chart-card" style={{gridColumn:'1/-1'}}>
+                  <div className="chart-title">⚡ Key Metrics</div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'1rem'}}>
+                    {[
+                      {label:'Conversion Rate', val:stats.total?Math.round((stats.converted||0)/stats.total*100)+'%':'0%', icon:'🏆', color:'#3fb950'},
+                      {label:'Contact Rate',    val:stats.total?Math.round(((stats.contacted||0)+(stats.converted||0))/stats.total*100)+'%':'0%', icon:'📞', color:'#f0a030'},
+                      {label:'New Pipeline',    val:stats.new||0, icon:'🆕', color:'#4f7dff'},
+                    ].map(m=>(
+                      <div key={m.label} style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:10,padding:'1.2rem',textAlign:'center',borderTop:`3px solid ${m.color}`}}>
+                        <div style={{fontSize:'1.5rem',marginBottom:'.4rem'}}>{m.icon}</div>
+                        <div style={{fontSize:'1.8rem',fontWeight:800,color:m.color}}>{m.val}</div>
+                        <div style={{fontSize:'.75rem',color:'var(--text2)',marginTop:'.3rem',fontWeight:600}}>{m.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* RECENT LEADS */}
+              <div className="recent-card">
+                <div className="chart-title">📋 Recent Leads</div>
+                {leads.length === 0
+                  ? <div style={{color:'var(--text2)',fontSize:'.85rem'}}>No leads yet. Add some!</div>
+                  : leads.slice(0,6).map(l=>(
+                    <div className="recent-row" key={l._id}>
+                      <div className="recent-avatar">{l.name[0].toUpperCase()}</div>
+                      <div style={{flex:1}}>
+                        <div style={{fontWeight:700,fontSize:'.88rem'}}>{l.name}</div>
+                        <div style={{fontSize:'.72rem',color:'var(--text2)'}}>{l.email}</div>
+                      </div>
+                      <span className={`badge badge-${l.status.toLowerCase()}`}>{l.status}</span>
+                      <span className="source-chip" style={{marginLeft:'.5rem'}}>{l.source}</span>
+                    </div>
+                  ))
+                }
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {(modal==='add'||(modal&&modal._id)) && (
+        <LeadModal lead={modal==='add'?null:modal} onClose={()=>setModal(null)} onSave={onSave} addToast={addToast}/>
+      )}
+
+      {delConfirm && (
+        <div className="modal-overlay" onClick={()=>setDelConfirm(null)}>
+          <div className="modal" style={{maxWidth:380}} onClick={e=>e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title">🗑 Delete Lead?</div>
+              <button className="modal-close" onClick={()=>setDelConfirm(null)}>✕</button>
+            </div>
+            <p style={{color:'var(--text2)',fontSize:'.9rem',marginBottom:'1.5rem'}}>
+              This action cannot be undone. The lead and all notes will be permanently removed.
+            </p>
+            <div className="form-actions">
+              <button className="btn btn-ghost" onClick={()=>setDelConfirm(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={()=>deleteLead(delConfirm)}>Yes, Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer toasts={toasts}/>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
