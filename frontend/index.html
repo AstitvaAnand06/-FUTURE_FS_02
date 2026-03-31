@@ -249,7 +249,9 @@
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect, useCallback, useRef } = React;
-const API = 'https://future-fs-02-dd06.onrender.com/';
+const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? "http://localhost:5001/api"
+  : "https://your-service-name.onrender.com/api"
 
 // ── ANIMATED BACKGROUND ──
 function initCanvas() {
